@@ -1,5 +1,8 @@
 package uk.gov.justice.services.messaging.spi;
 
+import static javax.json.JsonValue.EMPTY_JSON_ARRAY;
+import static javax.json.JsonValue.EMPTY_JSON_OBJECT;
+import static javax.json.JsonValue.NULL;
 import static uk.gov.justice.services.common.converter.JSONObjectValueObfuscator.obfuscated;
 import static uk.gov.justice.services.messaging.JsonEnvelopeWriter.writeJsonObject;
 import static uk.gov.justice.services.messaging.JsonMetadata.CORRELATION;
@@ -44,26 +47,73 @@ public class DefaultJsonEnvelope implements JsonEnvelope {
 
     @Override
     public JsonValue payload() {
+
+        if (payloadIsNull()) {
+            return NULL;
+        }
+
         return payload;
     }
 
     @Override
     public JsonObject payloadAsJsonObject() {
+
+        if (payloadIsNull()) {
+            throw new IncompatibleJsonPayloadTypeException(
+                    "The payload of this JsonEnvelope is null and set to JsonValue.NULL which is not a JsonObject. " +
+                            "Please call the method 'payload()' instead if your payload is expected to be null. " +
+                            "To check for null payloads please call the method 'payloadIsNull()'."
+            );
+        }
+
         return (JsonObject) payload;
     }
 
     @Override
     public JsonArray payloadAsJsonArray() {
+
+        if (payloadIsNull()) {
+            throw new IncompatibleJsonPayloadTypeException(
+                    "The payload of this JsonEnvelope is null and set to JsonValue.NULL which is not a JsonArray. " +
+                            "Please call the method 'payload()' instead if your payload is expected to be null. " +
+                            "To check for null payloads please call the method 'payloadIsNull()'."
+            );
+        }
+
+        
         return (JsonArray) payload;
     }
 
     @Override
+    public boolean payloadIsNull() {
+        return payload == null || NULL.equals(payload);
+    }
+
+    @Override
     public JsonNumber payloadAsJsonNumber() {
+
+        if (payloadIsNull()) {
+            throw new IncompatibleJsonPayloadTypeException(
+                    "The payload of this JsonEnvelope is null and set to JsonValue.NULL which is not a JsonNumber. " +
+                            "Please call the method 'payload()' instead if your payload is expected to be null. " +
+                            "To check for null payloads please call the method 'payloadIsNull()'."
+            );
+        }
+
         return (JsonNumber) payload;
     }
 
     @Override
     public JsonString payloadAsJsonString() {
+
+        if (payloadIsNull()) {
+            throw new IncompatibleJsonPayloadTypeException(
+                    "The payload of this JsonEnvelope is null and set to JsonValue.NULL which is not a JsonString. " +
+                            "Please call the method 'payload()' instead if your payload is expected to be null. " +
+                            "To check for null payloads please call the method 'payloadIsNull()'."
+            );
+        }
+
         return (JsonString) payload;
     }
 
