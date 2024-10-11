@@ -19,6 +19,7 @@ import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.core.enveloper.exception.InvalidEventException;
 import uk.gov.justice.services.core.extension.EventFoundEvent;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.justice.services.messaging.spi.IncompatibleJsonPayloadTypeException;
 
 import java.util.UUID;
 
@@ -108,13 +109,97 @@ public class DefaultEnveloperTest {
                         createObjectBuilder()), TEST_NAME)
                 .apply(null);
 
-        assertThat(event.payload(), equalTo(JsonValue.NULL));
+        assertThat(event.payload(), is(JsonValue.NULL));
         assertThat(event.metadata().id(), notNullValue());
         assertThat(event.metadata().name(), equalTo(TEST_NAME));
         assertThat(event.metadata().causation().size(), equalTo(2));
         assertThat(event.metadata().causation().get(0), equalTo(OLD_CAUSATION_ID));
         assertThat(event.metadata().causation().get(1), equalTo(COMMAND_UUID));
     }
+
+    @Test
+    public void shouldThrowExceptionWhenGettingPayloadAsJsonObjectIfThePayloadIsJsonNull() throws Exception {
+
+        final JsonEnvelope event = enveloper.withMetadataFrom(
+                        envelopeFrom(
+                                metadataBuilder()
+                                        .withId(COMMAND_UUID)
+                                        .withName(TEST_EVENT_NAME)
+                                        .withCausation(OLD_CAUSATION_ID),
+                                createObjectBuilder()), TEST_NAME)
+                .apply(null);
+
+        final IncompatibleJsonPayloadTypeException incompatibleJsonPayloadTypeException = assertThrows(IncompatibleJsonPayloadTypeException.class, event::payloadAsJsonObject);
+
+        assertThat(incompatibleJsonPayloadTypeException.getMessage(), is(
+                "The payload of this JsonEnvelope is set to JsonValue.NULL which is not a JsonObject. " +
+                        "Please call the method 'payload()' instead if your payload is expected to be null. " +
+                        "To check for null payloads please call the method 'payloadIsNull()'."));
+
+    }
+    
+    @Test
+    public void shouldThrowExceptionWhenGettingPayloadAsJsonArrayIfThePayloadIsJsonNull() throws Exception {
+
+        final JsonEnvelope event = enveloper.withMetadataFrom(
+                        envelopeFrom(
+                                metadataBuilder()
+                                        .withId(COMMAND_UUID)
+                                        .withName(TEST_EVENT_NAME)
+                                        .withCausation(OLD_CAUSATION_ID),
+                                createObjectBuilder()), TEST_NAME)
+                .apply(null);
+
+        final IncompatibleJsonPayloadTypeException incompatibleJsonPayloadTypeException = assertThrows(IncompatibleJsonPayloadTypeException.class, event::payloadAsJsonArray);
+
+        assertThat(incompatibleJsonPayloadTypeException.getMessage(), is(
+                "The payload of this JsonEnvelope is set to JsonValue.NULL which is not a JsonArray. " +
+                        "Please call the method 'payload()' instead if your payload is expected to be null. " +
+                        "To check for null payloads please call the method 'payloadIsNull()'."));
+
+
+    }
+
+    @Test
+    public void shouldThrowExceptionWhenGettingPayloadAsJsonNumberIfThePayloadIsJsonNull() throws Exception {
+
+        final JsonEnvelope event = enveloper.withMetadataFrom(
+                        envelopeFrom(
+                                metadataBuilder()
+                                        .withId(COMMAND_UUID)
+                                        .withName(TEST_EVENT_NAME)
+                                        .withCausation(OLD_CAUSATION_ID),
+                                createObjectBuilder()), TEST_NAME)
+                .apply(null);
+
+        final IncompatibleJsonPayloadTypeException incompatibleJsonPayloadTypeException = assertThrows(IncompatibleJsonPayloadTypeException.class, event::payloadAsJsonNumber);
+
+        assertThat(incompatibleJsonPayloadTypeException.getMessage(), is(
+                "The payload of this JsonEnvelope is set to JsonValue.NULL which is not a JsonNumber. " +
+                        "Please call the method 'payload()' instead if your payload is expected to be null. " +
+                        "To check for null payloads please call the method 'payloadIsNull()'."));
+    }
+
+    @Test
+    public void shouldThrowExceptionWhenGettingPayloadAsJsonStringIfThePayloadIsJsonNull() throws Exception {
+
+        final JsonEnvelope event = enveloper.withMetadataFrom(
+                        envelopeFrom(
+                                metadataBuilder()
+                                        .withId(COMMAND_UUID)
+                                        .withName(TEST_EVENT_NAME)
+                                        .withCausation(OLD_CAUSATION_ID),
+                                createObjectBuilder()), TEST_NAME)
+                .apply(null);
+
+        final IncompatibleJsonPayloadTypeException incompatibleJsonPayloadTypeException = assertThrows(IncompatibleJsonPayloadTypeException.class, event::payloadAsJsonString);
+
+        assertThat(incompatibleJsonPayloadTypeException.getMessage(), is(
+                "The payload of this JsonEnvelope is set to JsonValue.NULL which is not a JsonString. " +
+                        "Please call the method 'payload()' instead if your payload is expected to be null. " +
+                        "To check for null payloads please call the method 'payloadIsNull()'."));
+    }
+
 
     @Test
     public void shouldEnvelopeObjectWithoutCausation() throws Exception {

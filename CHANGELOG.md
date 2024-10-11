@@ -4,16 +4,33 @@ on [Keep a CHANGELOG](http://keepachangelog.com/). This project adheres to
 [Semantic Versioning](http://semver.org/).
 
 [Unreleased]
+
+## [17.5.8] - 2024-10-11
+### Added
+- New method 'payloadIsNull()' on DefaultJsonEnvelope, to check if the payload is `JsonValue.NULL` or `null`
+### Fixed
+- Fix where null payloads of JsonEnvelopes get converted to `JsonValue.NULL` and cause a ClassCastException
+- All JsonEnvelopes that have null payloads will now:
+  - return `JsonValue.NULL` if `getPayload()` is called
+  - throw `IncompatibleJsonPayloadTypeException` if `getPayloadAsJsonObject()` is called
+  - throw `IncompatibleJsonPayloadTypeException` if `getPayloadAsJsonArray()` is called
+  - throw `IncompatibleJsonPayloadTypeException` if `getPayloadAsJsonString()` is called
+  - throw `IncompatibleJsonPayloadTypeException` if `getPayloadAsJsonNumber()` is called
+
 ## [17.5.7] - 2024-08-12
+### Changed
 - For EVENT_PROCESSORs, derive the destinationType (queue|topic) from event_sources.location.jms_uri in event-sources.yaml when RAML is used for the EVENT_PROCESSOR
 
 ## [17.5.6] - 2024-08-06
+### Changed
 - For EVENT_PROCESSORs, derive the destinationType (queue|topic) from event_sources.location.jms_uri in event-sources.yaml when YAML is  used for the EVENT_PROCESSOR
 
 ## [17.5.5] - 2024-07-23
-- PEG-347: Jacksons SingleArgumentConstructor fix
+### Fixed
+- Jacksons SingleArgumentConstructor fix
 
 ## [17.5.3] - 2024-06-21
+### Changed
 - Update com.jayway.json-path to version 2.9.0 to fix **security vulnerability CWE-787**
   Detail: https://cwe.mitre.org/data/definitions/787.html
 
