@@ -92,7 +92,7 @@ public class MainApplicationTest {
 
         mainApplication.run(args);
 
-        verify(formatter).printHelp("java -jar catchup-shuttering-manager.jar", options);
+        verify(formatter).printHelp("java -jar framework-jmx-command-client-<version>.jar", options);
 
         verifyNoInteractions(commandExecutor);
     }

@@ -4,7 +4,7 @@ import static java.util.Optional.of;
 
 import uk.gov.justice.framework.command.client.io.ToConsolePrinter;
 import uk.gov.justice.services.jmx.api.command.SystemCommandDetails;
-import uk.gov.justice.services.jmx.api.mbean.SystemCommanderMBean;
+import uk.gov.justice.services.jmx.api.mbean.JmxCommandMBean;
 import uk.gov.justice.services.jmx.system.command.client.SystemCommanderClient;
 import uk.gov.justice.services.jmx.system.command.client.SystemCommanderClientFactory;
 import uk.gov.justice.services.jmx.system.command.client.connection.JmxParameters;
@@ -30,7 +30,7 @@ public class ListCommandsInvoker {
         jmxParameters.getCredentials().ifPresent(credentials -> toConsolePrinter.printf("Connecting with credentials for user '%s'", credentials.getUsername()));
 
         try (final SystemCommanderClient systemCommanderClient = systemCommanderClientFactory.create(jmxParameters)) {
-            final SystemCommanderMBean remote = systemCommanderClient.getRemote(contextName);
+            final JmxCommandMBean remote = systemCommanderClient.getRemote(contextName);
 
             toConsolePrinter.printf("Connected to %s context", contextName);
 

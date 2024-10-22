@@ -6,7 +6,7 @@ import static java.time.Duration.between;
 import uk.gov.justice.framework.command.client.io.ToConsolePrinter;
 import uk.gov.justice.framework.command.client.util.Sleeper;
 import uk.gov.justice.framework.command.client.util.UtcClock;
-import uk.gov.justice.services.jmx.api.mbean.SystemCommanderMBean;
+import uk.gov.justice.services.jmx.api.mbean.JmxCommandMBean;
 
 import java.time.ZonedDateTime;
 import java.util.UUID;
@@ -29,12 +29,12 @@ public class CommandPoller {
         this.toConsolePrinter = toConsolePrinter;
     }
 
-    public void runUntilComplete(final SystemCommanderMBean systemCommanderMBean, final UUID commandId, final String commandName) {
+    public void runUntilComplete(final JmxCommandMBean jmxCommandMBean, final UUID commandId, final String commandName) {
 
         final ZonedDateTime startTime = clock.now();
 
         int count = 0;
-        while (! commandChecker.commandComplete(systemCommanderMBean, commandId, startTime)) {
+        while (! commandChecker.commandComplete(jmxCommandMBean, commandId, startTime)) {
             sleeper.sleepFor(1_000);
             count++;
 

@@ -10,7 +10,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
-import uk.gov.justice.services.jmx.api.mbean.SystemCommander;
+import uk.gov.justice.services.jmx.api.mbean.DefaultJmxCommandMBean;
 import uk.gov.justice.services.jmx.api.name.CommandMBeanNameProvider;
 import uk.gov.justice.services.jmx.api.name.ObjectNameException;
 import uk.gov.justice.services.jmx.util.ContextNameProvider;
@@ -33,7 +33,7 @@ public class MBeanInstantiatorTest {
     private MBeanServer mbeanServer;
 
     @Mock
-    private SystemCommander systemCommander;
+    private DefaultJmxCommandMBean systemCommander;
 
     @Mock
     private ContextNameProvider contextNameProvider;
@@ -60,7 +60,7 @@ public class MBeanInstantiatorTest {
         mBeanInstantiator.registerSystemCommanderMBean();
 
         verify(mbeanServer).registerMBean(systemCommander, objectName);
-        verify(logger).info("Registering SystemCommander MBean using name 'mBeanName'");
+        verify(logger).info("Registering JMX mBean class 'DefaultJmxCommandMBean' using name 'mBeanName'");
     }
 
     @Test
@@ -113,7 +113,7 @@ public class MBeanInstantiatorTest {
         mBeanInstantiator.unregisterMBeans();
 
         verify(mbeanServer).unregisterMBean(objectName);
-        verify(logger).info("Unregistering SystemCommander MBean using name 'mBeanName'");
+        verify(logger).info("Unregistering JMX MBean class 'DefaultJmxCommandMBean' using name 'mBeanName'");
     }
 
     @Test

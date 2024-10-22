@@ -5,14 +5,13 @@ import uk.gov.justice.framework.command.client.io.ToConsolePrinter;
 import uk.gov.justice.services.jmx.api.SystemCommandInvocationFailedException;
 import uk.gov.justice.services.jmx.api.UnrunnableSystemCommandException;
 import uk.gov.justice.services.jmx.api.mbean.CommandRunMode;
-import uk.gov.justice.services.jmx.api.mbean.SystemCommanderMBean;
+import uk.gov.justice.services.jmx.api.mbean.JmxCommandMBean;
+import uk.gov.justice.services.jmx.api.parameters.JmxCommandRuntimeParameters;
 import uk.gov.justice.services.jmx.system.command.client.SystemCommanderClient;
 import uk.gov.justice.services.jmx.system.command.client.SystemCommanderClientFactory;
 import uk.gov.justice.services.jmx.system.command.client.connection.JmxParameters;
 
 import java.util.UUID;
-
-import org.apache.commons.lang3.StringUtils;
 
 public class SystemCommandInvoker {
 
@@ -29,7 +28,11 @@ public class SystemCommandInvoker {
         this.toConsolePrinter = toConsolePrinter;
     }
 
-    public void runSystemCommand(final String commandName, final JmxParameters jmxParameters, final String commandRuntimeId, final CommandRunMode commandRunMode) {
+    public void runSystemCommand(
+            final String commandName,
+            final JmxParameters jmxParameters,
+            final JmxCommandRuntimeParameters jmxCommandRuntimeParameters,
+            final CommandRunMode commandRunMode) {
 
         final String contextName = jmxParameters.getContextName();
 
@@ -42,10 +45,10 @@ public class SystemCommandInvoker {
 
             toConsolePrinter.printf("Connected to %s context", contextName);
 
-            final SystemCommanderMBean systemCommanderMBean = systemCommanderClient.getRemote(contextName);
-            final UUID commandId = invoke(systemCommanderMBean, commandName, commandRuntimeId, commandRunMode);
+            final JmxCommandMBean jmxCommandMBean = systemCommanderClient.getRemote(contextName);
+            final UUID commandId = jmxCommandMBean.call(commandName, jmxCommandRuntimeParameters, commandRunMode);
             toConsolePrinter.printf("System command '%s' with id '%s' successfully sent to %s", commandName, commandId, contextName);
-            commandPoller.runUntilComplete(systemCommanderMBean, commandId, commandName);
+            commandPoller.runUntilComplete(jmxCommandMBean, commandId, commandName);
 
         } catch (final UnrunnableSystemCommandException e) {
             toConsolePrinter.printf("The command '%s' is not supported on this %s context", commandName, contextName);
@@ -60,19 +63,4 @@ public class SystemCommandInvoker {
         }
     }
 
-    private UUID invoke(final SystemCommanderMBean systemCommanderMBean, final String commandName, final String commandRuntimeId, final CommandRunMode commandRunMode) {
-        if(StringUtils.isEmpty(commandRuntimeId)) {
-            return systemCommanderMBean.call(commandName, commandRunMode);
-        } else {
-            return systemCommanderMBean.callWithRuntimeId(commandName, convertToUUID(commandRuntimeId), commandRunMode);
-        }
-    }
-
-    private UUID convertToUUID(String id) {
-        try{
-            return UUID.fromString(id);
-        } catch(IllegalArgumentException e) {
-            throw new CommandLineException("Unable to invoke command as supplied commandRuntimeId is not uuid format: " + id, e);
-        }
-    }
 }

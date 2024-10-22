@@ -10,8 +10,13 @@ public interface SystemCommand extends Serializable {
     default boolean requiresCommandRuntimeId() {
         return false;
     }
-
     default String commandRuntimeIdType() {
+        return "Not required";
+    }
+    default boolean requiresCommandRuntimeString() {
+        return false;
+    }
+    default String commandRuntimeStringType() {
         return "Not required";
     }
 }

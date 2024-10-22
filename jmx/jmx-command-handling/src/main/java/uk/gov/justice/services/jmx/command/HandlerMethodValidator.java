@@ -5,6 +5,7 @@ import static java.lang.reflect.Modifier.isPublic;
 
 import uk.gov.justice.services.jmx.api.InvalidHandlerMethodException;
 import uk.gov.justice.services.jmx.api.command.SystemCommand;
+import uk.gov.justice.services.jmx.api.parameters.JmxCommandRuntimeParameters;
 
 import java.lang.reflect.Method;
 import java.util.Optional;
@@ -13,10 +14,10 @@ import java.util.UUID;
 public class HandlerMethodValidator {
 
 
-    public void checkHandlerMethodIsValid(final Method handlerMethod, final Object instance, final Optional<UUID> commandRuntimeId) throws InvalidHandlerMethodException {
+    public void checkHandlerMethodIsValid(final Method handlerMethod, final Object instance, final JmxCommandRuntimeParameters jmxCommandRuntimeParameters) throws InvalidHandlerMethodException {
 
         checkMethodPublic(handlerMethod, instance);
-        checkMethodParameters(handlerMethod, instance, commandRuntimeId);
+        checkMethodParameters(handlerMethod, instance, jmxCommandRuntimeParameters);
     }
 
     private void checkMethodPublic(final Method handlerMethod, final Object instance) throws InvalidHandlerMethodException {
@@ -26,10 +27,10 @@ public class HandlerMethodValidator {
         }
     }
 
-    private void checkMethodParameters(final Method handlerMethod, final Object instance, final Optional<UUID> commandRuntimeId) throws InvalidHandlerMethodException {
+    private void checkMethodParameters(final Method handlerMethod, final Object instance, final JmxCommandRuntimeParameters jmxCommandRuntimeParameters) throws InvalidHandlerMethodException {
         final Class<?>[] parameterTypes = handlerMethod.getParameterTypes();
 
-        if (commandRuntimeId.isPresent()) {
+        if (jmxCommandRuntimeParameters.getCommandRuntimeId().isPresent()) {
             if (parameterTypes.length != 3) {
                 throw new InvalidHandlerMethodException(format("Invalid handler method '%s' on class '%s'. Method should have 3 parameters. First of type '%s' and second of type '%s' and third of type '%s'.",
                         handlerMethod.getName(),

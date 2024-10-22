@@ -9,7 +9,7 @@ import static org.mockito.Mockito.when;
 import uk.gov.justice.framework.command.client.io.ToConsolePrinter;
 import uk.gov.justice.framework.command.client.util.Sleeper;
 import uk.gov.justice.framework.command.client.util.UtcClock;
-import uk.gov.justice.services.jmx.api.mbean.SystemCommanderMBean;
+import uk.gov.justice.services.jmx.api.mbean.JmxCommandMBean;
 
 import java.time.ZonedDateTime;
 import java.util.UUID;
@@ -46,12 +46,12 @@ public class CommandPollerTest {
 
         final ZonedDateTime startTime = new UtcClock().now();
 
-        final SystemCommanderMBean systemCommanderMBean = mock(SystemCommanderMBean.class);
+        final JmxCommandMBean jmxCommandMBean = mock(JmxCommandMBean.class);
 
         when(clock.now()).thenReturn(startTime);
-        when(commandChecker.commandComplete(systemCommanderMBean, commandId, startTime)).thenReturn(false, false, true);
+        when(commandChecker.commandComplete(jmxCommandMBean, commandId, startTime)).thenReturn(false, false, true);
 
-        commandPoller.runUntilComplete(systemCommanderMBean, commandId, commandName);
+        commandPoller.runUntilComplete(jmxCommandMBean, commandId, commandName);
 
         verify(sleeper, times(2)).sleepFor(1_000);
         verifyNoInteractions(toConsolePrinter);
@@ -66,12 +66,12 @@ public class CommandPollerTest {
         final ZonedDateTime startTime = new UtcClock().now();
         final ZonedDateTime now = startTime.plusSeconds(10);
 
-        final SystemCommanderMBean systemCommanderMBean = mock(SystemCommanderMBean.class);
+        final JmxCommandMBean jmxCommandMBean = mock(JmxCommandMBean.class);
 
         when(clock.now()).thenReturn(startTime, now);
-        when(commandChecker.commandComplete(systemCommanderMBean, commandId, startTime)).thenReturn(false, false, false, false, false, false, false, false, false, false, true);
+        when(commandChecker.commandComplete(jmxCommandMBean, commandId, startTime)).thenReturn(false, false, false, false, false, false, false, false, false, false, true);
 
-        commandPoller.runUntilComplete(systemCommanderMBean, commandId, commandName);
+        commandPoller.runUntilComplete(jmxCommandMBean, commandId, commandName);
 
         verify(sleeper, times(10)).sleepFor(1_000);
         verify(toConsolePrinter).println("CATCHUP running for 10 seconds");

@@ -2,7 +2,7 @@ package uk.gov.justice.services.jmx;
 
 import static java.lang.String.format;
 
-import uk.gov.justice.services.jmx.api.mbean.SystemCommander;
+import uk.gov.justice.services.jmx.api.mbean.DefaultJmxCommandMBean;
 import uk.gov.justice.services.jmx.api.name.CommandMBeanNameProvider;
 import uk.gov.justice.services.jmx.api.name.ObjectNameException;
 import uk.gov.justice.services.jmx.util.ContextNameProvider;
@@ -29,7 +29,7 @@ public class MBeanInstantiator {
     private MBeanServer mbeanServer;
 
     @Inject
-    private SystemCommander systemCommander;
+    private DefaultJmxCommandMBean systemCommander;
 
     @Inject
     private ContextNameProvider contextNameProvider;
@@ -66,7 +66,7 @@ public class MBeanInstantiator {
     private void register(final ObjectName objectName) {
         try {
 
-            logger.info(format("Registering %s MBean using name '%s'", SystemCommander.class.getSimpleName(), objectName));
+            logger.info(format("Registering JMX mBean class '%s' using name '%s'", DefaultJmxCommandMBean.class.getSimpleName(), objectName));
 
             mbeanServer.registerMBean(systemCommander, objectName);
 
@@ -78,7 +78,7 @@ public class MBeanInstantiator {
 
     private void unregister(final ObjectName objectName) {
         try {
-            logger.info(format("Unregistering %s MBean using name '%s'",  SystemCommander.class.getSimpleName(), objectName));
+            logger.info(format("Unregistering JMX MBean class '%s' using name '%s'",  DefaultJmxCommandMBean.class.getSimpleName(), objectName));
             mbeanServer.unregisterMBean(objectName);
         } catch (final InstanceNotFoundException | MBeanRegistrationException e) {
             throw new ObjectNameException(format("Failed to unregister MBean with object name '%s'", objectName), e);
