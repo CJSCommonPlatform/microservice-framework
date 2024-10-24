@@ -12,7 +12,8 @@ import static uk.gov.justice.services.management.suspension.commands.UnsuspendCo
 import static uk.gov.justice.services.test.utils.common.host.TestHostProvider.getHost;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.getValueOfField;
 
-import uk.gov.justice.services.jmx.api.mbean.SystemCommanderMBean;
+import uk.gov.justice.services.jmx.api.mbean.JmxCommandMBean;
+import uk.gov.justice.services.jmx.api.parameters.JmxCommandRuntimeParameters;
 import uk.gov.justice.services.jmx.system.command.client.connection.Credentials;
 import uk.gov.justice.services.jmx.system.command.client.connection.JmxParameters;
 
@@ -35,18 +36,22 @@ public class FrameworkSystemCommandCallerTest {
         final String contextName = "contextName";
 
         final JmxParameters jmxParameters = mock(JmxParameters.class);
+        final JmxCommandRuntimeParameters jmxCommandRuntimeParameters = mock(JmxCommandRuntimeParameters.class);
         final SystemCommanderClient systemCommanderClient = mock(SystemCommanderClient.class);
-        final SystemCommanderMBean systemCommanderMBean = mock(SystemCommanderMBean.class);
+        final JmxCommandMBean jmxCommandMBean = mock(JmxCommandMBean.class);
 
-        final FrameworkSystemCommandCaller frameworkSystemCommandCaller = new FrameworkSystemCommandCaller(jmxParameters, testSystemCommanderClientFactory);
+        final FrameworkSystemCommandCaller frameworkSystemCommandCaller = new FrameworkSystemCommandCaller(
+                jmxParameters,
+                jmxCommandRuntimeParameters,
+                testSystemCommanderClientFactory);
 
         when(jmxParameters.getContextName()).thenReturn(contextName);
         when(testSystemCommanderClientFactory.create(jmxParameters)).thenReturn(systemCommanderClient);
-        when(systemCommanderClient.getRemote(contextName)).thenReturn(systemCommanderMBean);
+        when(systemCommanderClient.getRemote(contextName)).thenReturn(jmxCommandMBean);
 
         frameworkSystemCommandCaller.callShutter();
 
-        verify(systemCommanderMBean).call(SUSPEND, GUARDED);
+        verify(jmxCommandMBean).call(SUSPEND, jmxCommandRuntimeParameters, GUARDED);
         verify(systemCommanderClient).close();
     }
 
@@ -56,18 +61,22 @@ public class FrameworkSystemCommandCallerTest {
         final String contextName = "contextName";
 
         final JmxParameters jmxParameters = mock(JmxParameters.class);
+        final JmxCommandRuntimeParameters jmxCommandRuntimeParameters = mock(JmxCommandRuntimeParameters.class);
         final SystemCommanderClient systemCommanderClient = mock(SystemCommanderClient.class);
-        final SystemCommanderMBean systemCommanderMBean = mock(SystemCommanderMBean.class);
+        final JmxCommandMBean jmxCommandMBean = mock(JmxCommandMBean.class);
 
-        final FrameworkSystemCommandCaller frameworkSystemCommandCaller = new FrameworkSystemCommandCaller(jmxParameters, testSystemCommanderClientFactory);
+        final FrameworkSystemCommandCaller frameworkSystemCommandCaller = new FrameworkSystemCommandCaller(
+                jmxParameters,
+                jmxCommandRuntimeParameters,
+                testSystemCommanderClientFactory);
 
         when(jmxParameters.getContextName()).thenReturn(contextName);
         when(testSystemCommanderClientFactory.create(jmxParameters)).thenReturn(systemCommanderClient);
-        when(systemCommanderClient.getRemote(contextName)).thenReturn(systemCommanderMBean);
+        when(systemCommanderClient.getRemote(contextName)).thenReturn(jmxCommandMBean);
 
         frameworkSystemCommandCaller.callUnshutter();
 
-        verify(systemCommanderMBean).call(UNSUSPEND, GUARDED);
+        verify(jmxCommandMBean).call(UNSUSPEND, jmxCommandRuntimeParameters, GUARDED);
         verify(systemCommanderClient).close();
     }
 

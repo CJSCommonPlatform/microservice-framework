@@ -6,7 +6,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 import org.junit.jupiter.api.Test;
 
-public class JmxCommandBootstrapObjectFactoryTest {
+public class DefaultJmxCommandMBeanBootstrapObjectFactoryTest {
 
     private final JmxCommandBootstrapObjectFactory jmxCommandBootstrapObjectFactory = new JmxCommandBootstrapObjectFactory();
 

@@ -7,7 +7,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import uk.gov.justice.services.jmx.api.mbean.SystemCommanderMBean;
+import uk.gov.justice.services.jmx.api.mbean.JmxCommandMBean;
 import uk.gov.justice.services.jmx.system.command.client.connection.MBeanConnector;
 
 import javax.management.remote.JMXConnector;
@@ -34,14 +34,14 @@ public class SystemCommanderClientTest {
     public void shouldGetTheRemoteSystemCommanderMBean() throws Exception {
 
         final String contextName = "my-context";
-        final SystemCommanderMBean systemCommanderMBean = mock(SystemCommanderMBean.class);
+        final JmxCommandMBean jmxCommandMBean = mock(JmxCommandMBean.class);
 
         when(mBeanConnector.connect(
                 contextName,
-                SystemCommanderMBean.class,
-                jmxConnector)).thenReturn(systemCommanderMBean);
+                JmxCommandMBean.class,
+                jmxConnector)).thenReturn(jmxCommandMBean);
 
-        assertThat(systemCommanderClient.getRemote(contextName), is(systemCommanderMBean));
+        assertThat(systemCommanderClient.getRemote(contextName), is(jmxCommandMBean));
     }
 
     @Test

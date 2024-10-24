@@ -63,7 +63,7 @@ public class MainApplication {
             }
 
         } else {
-            formatter.printHelp("java -jar catchup-shuttering-manager.jar", optionsFactory.createOptions());
+            formatter.printHelp("java -jar framework-jmx-command-client-<version>.jar", optionsFactory.createOptions());
         }
 
         return SUCCESS;

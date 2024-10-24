@@ -11,7 +11,7 @@ import static org.mockito.Mockito.when;
 
 import uk.gov.justice.framework.command.client.io.ToConsolePrinter;
 import uk.gov.justice.services.jmx.api.command.SystemCommandDetails;
-import uk.gov.justice.services.jmx.api.mbean.SystemCommanderMBean;
+import uk.gov.justice.services.jmx.api.mbean.JmxCommandMBean;
 import uk.gov.justice.services.jmx.system.command.client.SystemCommanderClient;
 import uk.gov.justice.services.jmx.system.command.client.SystemCommanderClientFactory;
 import uk.gov.justice.services.jmx.system.command.client.connection.Credentials;
@@ -49,7 +49,7 @@ public class ListCommandsInvokerTest {
 
         final JmxParameters jmxParameters = mock(JmxParameters.class);
         final SystemCommanderClient systemCommanderClient = mock(SystemCommanderClient.class);
-        final SystemCommanderMBean commanderMBean = mock(SystemCommanderMBean.class);
+        final JmxCommandMBean commanderMBean = mock(JmxCommandMBean.class);
 
         when(jmxParameters.getContextName()).thenReturn(contextName);
         when(jmxParameters.getHost()).thenReturn(host);
@@ -85,7 +85,7 @@ public class ListCommandsInvokerTest {
         final Credentials credentials = mock(Credentials.class);
         final JmxParameters jmxParameters = mock(JmxParameters.class);
         final SystemCommanderClient systemCommanderClient = mock(SystemCommanderClient.class);
-        final SystemCommanderMBean commanderMBean = mock(SystemCommanderMBean.class);
+        final JmxCommandMBean commanderMBean = mock(JmxCommandMBean.class);
 
         when(jmxParameters.getContextName()).thenReturn(contextName);
         when(jmxParameters.getHost()).thenReturn(host);

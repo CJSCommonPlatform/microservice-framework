@@ -23,6 +23,7 @@ import uk.gov.justice.services.jmx.api.UnrunnableSystemCommandException;
 import uk.gov.justice.services.jmx.api.command.SystemCommand;
 import uk.gov.justice.services.jmx.api.command.SystemCommandDetails;
 import uk.gov.justice.services.jmx.api.domain.SystemCommandStatus;
+import uk.gov.justice.services.jmx.api.parameters.JmxCommandRuntimeParameters;
 import uk.gov.justice.services.jmx.command.CommandConverter;
 import uk.gov.justice.services.jmx.command.SystemCommandLocator;
 import uk.gov.justice.services.jmx.command.SystemCommandScanner;
@@ -31,7 +32,6 @@ import uk.gov.justice.services.jmx.runner.AsynchronousCommandRunner;
 import uk.gov.justice.services.jmx.state.observers.SystemCommandStateBean;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
@@ -43,7 +43,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 
 @ExtendWith(MockitoExtension.class)
-public class SystemCommanderTest {
+public class DefaultJmxCommandMBeanTest {
 
     @Mock
     private SystemCommandLocator systemCommandLocator;
@@ -61,32 +61,32 @@ public class SystemCommanderTest {
     private CommandConverter commandConverter;
 
     @Mock
-    private SystemCommandVerifier systemCommandVerifier;
+    private JmxCommandVerifier jmxCommandVerifier;
 
     @Mock
     private Logger logger;
 
     @InjectMocks
-    private SystemCommander systemCommander;
+    private DefaultJmxCommandMBean systemCommander;
 
     @Test
     public void shouldRunTheSystemCommandInForcedModeWhenCommandRunModeNotSupplied() throws Exception {
 
         final UUID commandId = randomUUID();
         final TestCommand testCommand = new TestCommand();
-        final Optional<UUID> commandRuntimeId = empty();
+        final JmxCommandRuntimeParameters jmxCommandRuntimeParameters = mock(JmxCommandRuntimeParameters.class);
 
         when(systemCommandLocator.forName(testCommand.getName())).thenReturn(of(testCommand));
-        when(asynchronousCommandRunner.run(testCommand, commandRuntimeId)).thenReturn(commandId);
+        when(asynchronousCommandRunner.run(testCommand, jmxCommandRuntimeParameters)).thenReturn(commandId);
 
-        assertThat(systemCommander.call("TEST_COMMAND"), is(commandId));
+        assertThat(systemCommander.call("TEST_COMMAND", jmxCommandRuntimeParameters), is(commandId));
 
-        final InOrder inOrder = inOrder(logger, systemCommandVerifier, asynchronousCommandRunner);
+        final InOrder inOrder = inOrder(logger, jmxCommandVerifier, asynchronousCommandRunner);
 
         inOrder.verify(logger).info("Received System Command 'TEST_COMMAND'");
         inOrder.verify(logger).info("Running 'TEST_COMMAND' in 'FORCED' mode");
-        inOrder.verify(systemCommandVerifier).verify(testCommand, commandRuntimeId);
-        inOrder.verify(asynchronousCommandRunner).run(testCommand, commandRuntimeId);
+        inOrder.verify(jmxCommandVerifier).verify(testCommand, jmxCommandRuntimeParameters);
+        inOrder.verify(asynchronousCommandRunner).run(testCommand, jmxCommandRuntimeParameters);
     }
 
     @Test
@@ -94,50 +94,34 @@ public class SystemCommanderTest {
 
         final UUID commandId = randomUUID();
         final TestCommand testCommand = new TestCommand();
-        final Optional<UUID> commandRuntimeId = empty();
+        final JmxCommandRuntimeParameters jmxCommandRuntimeParameters = mock(JmxCommandRuntimeParameters.class);
 
         when(systemCommandLocator.forName(testCommand.getName())).thenReturn(of(testCommand));
-        when(asynchronousCommandRunner.run(testCommand, commandRuntimeId)).thenReturn(commandId);
+        when(asynchronousCommandRunner.run(testCommand, jmxCommandRuntimeParameters)).thenReturn(commandId);
 
-        assertThat(systemCommander.call("TEST_COMMAND", GUARDED), is(commandId));
+        assertThat(systemCommander.call("TEST_COMMAND", jmxCommandRuntimeParameters, GUARDED), is(commandId));
 
-        final InOrder inOrder = inOrder(logger, systemCommandVerifier, asynchronousCommandRunner);
+        final InOrder inOrder = inOrder(logger, jmxCommandVerifier, asynchronousCommandRunner);
 
         inOrder.verify(logger).info("Received System Command 'TEST_COMMAND'");
         inOrder.verify(logger).info("Running 'TEST_COMMAND' in 'GUARDED' mode");
-        inOrder.verify(systemCommandVerifier).verify(testCommand, commandRuntimeId);
-        inOrder.verify(asynchronousCommandRunner).run(testCommand, commandRuntimeId);
-    }
-
-    @Test
-    public void shouldRunTheSystemCommandWithIdIfSupported() throws Exception {
-
-        final UUID commandId = randomUUID();
-        final UUID commandRuntimeId = fromString("ce37d217-48a4-4a76-8a86-2e1d2d4c1ec2");
-        final TestCommand testCommand = new TestCommand();
-        final CommandRunMode commandRunMode = GUARDED;
-
-        when(systemCommandLocator.forName(testCommand.getName())).thenReturn(of(testCommand));
-        when(asynchronousCommandRunner.run(testCommand, of(commandRuntimeId))).thenReturn(commandId);
-
-        assertThat(systemCommander.callWithRuntimeId("TEST_COMMAND", commandRuntimeId, commandRunMode), is(commandId));
-
-        final InOrder inOrder = inOrder(logger, systemCommandVerifier, asynchronousCommandRunner);
-
-        inOrder.verify(logger).info("Received System Command 'TEST_COMMAND' with UUID '" + commandRuntimeId + "'");
-        inOrder.verify(logger).info("Running 'TEST_COMMAND' with UUID '%s' in 'GUARDED' mode".formatted(commandRuntimeId));
-        inOrder.verify(systemCommandVerifier).verify(testCommand, of(commandRuntimeId));
-        inOrder.verify(asynchronousCommandRunner).run(testCommand, of(commandRuntimeId));
+        inOrder.verify(jmxCommandVerifier).verify(testCommand, jmxCommandRuntimeParameters);
+        inOrder.verify(asynchronousCommandRunner).run(testCommand, jmxCommandRuntimeParameters);
     }
 
     @Test
     public void shouldFailIfSystemCommandNotSupported() throws Exception {
 
         final TestCommand testCommand = new TestCommand();
+        final JmxCommandRuntimeParameters jmxCommandRuntimeParameters = mock(JmxCommandRuntimeParameters.class);
 
         when(systemCommandLocator.forName(testCommand.getName())).thenReturn(empty());
 
-        final UnrunnableSystemCommandException e = assertThrows(UnrunnableSystemCommandException.class, () -> systemCommander.call("TEST_COMMAND", GUARDED));
+        final UnrunnableSystemCommandException e = assertThrows(UnrunnableSystemCommandException.class, () -> systemCommander.call(
+                "TEST_COMMAND",
+                jmxCommandRuntimeParameters,
+                GUARDED));
+
         assertThat(e.getMessage(), is("The system command 'TEST_COMMAND' is not supported on this context."));
     }
 
@@ -145,12 +129,13 @@ public class SystemCommanderTest {
     public void shouldFailIfPreviousSystemCommandIsInProgress() throws Exception {
 
         final TestCommand testCommand = new TestCommand();
+        final JmxCommandRuntimeParameters jmxCommandRuntimeParameters = mock(JmxCommandRuntimeParameters.class);
 
         when(systemCommandLocator.forName(testCommand.getName())).thenReturn(of(testCommand));
         when(systemCommandStateBean.commandInProgress(testCommand)).thenReturn(true);
 
         try {
-            systemCommander.call("TEST_COMMAND", GUARDED);
+            systemCommander.call("TEST_COMMAND", jmxCommandRuntimeParameters, GUARDED);
             fail();
         } catch (final UnrunnableSystemCommandException expected) {
             assertThat(expected.getMessage(), is("Cannot run system command 'TEST_COMMAND'. A previous call to that command is still in progress."));
@@ -162,10 +147,15 @@ public class SystemCommanderTest {
 
         final TestCommand testCommand = new TestCommand();
 
+        final JmxCommandRuntimeParameters jmxCommandRuntimeParameters = mock(JmxCommandRuntimeParameters.class);
+
         when(systemCommandLocator.forName(testCommand.getName())).thenReturn(of(testCommand));
         when(systemCommandStateBean.commandInProgress(testCommand)).thenReturn(true);
 
-        final UnrunnableSystemCommandException e = assertThrows(UnrunnableSystemCommandException.class, () -> systemCommander.call("TEST_COMMAND", GUARDED));
+        final UnrunnableSystemCommandException e = assertThrows(UnrunnableSystemCommandException.class, () -> systemCommander.call(
+                "TEST_COMMAND",
+                jmxCommandRuntimeParameters,
+                GUARDED));
         assertThat(e.getMessage(), is("Cannot run system command 'TEST_COMMAND'. A previous call to that command is still in progress."));
     }
 
@@ -175,16 +165,21 @@ public class SystemCommanderTest {
         final UUID commandId = randomUUID();
         final TestCommand testCommand = new TestCommand();
 
-        when(systemCommandLocator.forName(testCommand.getName())).thenReturn(of(testCommand));
-        when(asynchronousCommandRunner.run(testCommand, empty())).thenReturn(commandId);
+        final JmxCommandRuntimeParameters jmxCommandRuntimeParameters = mock(JmxCommandRuntimeParameters.class);
 
-        assertThat(systemCommander.call("TEST_COMMAND", FORCED), is(commandId));
+        when(systemCommandLocator.forName(testCommand.getName())).thenReturn(of(testCommand));
+        when(asynchronousCommandRunner.run(testCommand, jmxCommandRuntimeParameters)).thenReturn(commandId);
+
+        assertThat(systemCommander.call(
+                "TEST_COMMAND",
+                jmxCommandRuntimeParameters,
+                FORCED), is(commandId));
 
         final InOrder inOrder = inOrder(logger, asynchronousCommandRunner);
 
         inOrder.verify(logger).info("Received System Command 'TEST_COMMAND'");
         inOrder.verify(logger).info("Running 'TEST_COMMAND' in 'FORCED' mode");
-        inOrder.verify(asynchronousCommandRunner).run(testCommand, empty());
+        inOrder.verify(asynchronousCommandRunner).run(testCommand, jmxCommandRuntimeParameters);
 
         verify(systemCommandStateBean, never()).commandInProgress(testCommand);
     }

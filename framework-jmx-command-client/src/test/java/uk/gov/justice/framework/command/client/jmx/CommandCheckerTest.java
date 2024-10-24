@@ -15,7 +15,7 @@ import uk.gov.justice.framework.command.client.SystemCommandFailedException;
 import uk.gov.justice.framework.command.client.io.ToConsolePrinter;
 import uk.gov.justice.framework.command.client.util.UtcClock;
 import uk.gov.justice.services.jmx.api.domain.SystemCommandStatus;
-import uk.gov.justice.services.jmx.api.mbean.SystemCommanderMBean;
+import uk.gov.justice.services.jmx.api.mbean.JmxCommandMBean;
 
 import java.time.ZonedDateTime;
 import java.util.UUID;
@@ -47,16 +47,16 @@ public class CommandCheckerTest {
         final ZonedDateTime startTime = new UtcClock().now();
         final ZonedDateTime endedAt = startTime.plusMinutes(83);
 
-        final SystemCommanderMBean systemCommanderMBean = mock(SystemCommanderMBean.class);
+        final JmxCommandMBean jmxCommandMBean = mock(JmxCommandMBean.class);
         final SystemCommandStatus systemCommandStatus = mock(SystemCommandStatus.class);
 
         when(clock.now()).thenReturn(endedAt);
-        when(systemCommanderMBean.getCommandStatus(commandId)).thenReturn(systemCommandStatus);
+        when(jmxCommandMBean.getCommandStatus(commandId)).thenReturn(systemCommandStatus);
         when(systemCommandStatus.getCommandState()).thenReturn(COMMAND_COMPLETE);
         when(systemCommandStatus.getSystemCommandName()).thenReturn("CATCHUP");
         when(systemCommandStatus.getMessage()).thenReturn(message);
 
-        assertThat(commandChecker.commandComplete(systemCommanderMBean, commandId, startTime), is(true));
+        assertThat(commandChecker.commandComplete(jmxCommandMBean, commandId, startTime), is(true));
 
         verify(toConsolePrinter).println(message);
         verify(toConsolePrinter).println("Command CATCHUP complete");
@@ -73,17 +73,17 @@ public class CommandCheckerTest {
         final ZonedDateTime startTime = new UtcClock().now();
         final ZonedDateTime endedAt = startTime.plusMinutes(83);
 
-        final SystemCommanderMBean systemCommanderMBean = mock(SystemCommanderMBean.class);
+        final JmxCommandMBean jmxCommandMBean = mock(JmxCommandMBean.class);
         final SystemCommandStatus systemCommandStatus = mock(SystemCommandStatus.class);
 
         when(clock.now()).thenReturn(endedAt);
-        when(systemCommanderMBean.getCommandStatus(commandId)).thenReturn(systemCommandStatus);
+        when(jmxCommandMBean.getCommandStatus(commandId)).thenReturn(systemCommandStatus);
         when(systemCommandStatus.getCommandState()).thenReturn(COMMAND_FAILED);
         when(systemCommandStatus.getSystemCommandName()).thenReturn("CATCHUP");
         when(systemCommandStatus.getMessage()).thenReturn(errorMessage);
 
         try {
-            commandChecker.commandComplete(systemCommanderMBean, commandId, startTime);
+            commandChecker.commandComplete(jmxCommandMBean, commandId, startTime);
             fail();
         } catch (final SystemCommandFailedException expected) {
             assertThat(expected.getMessage(), is("Comand CATCHUP failed. CATCHUP failed with 23 errors"));
@@ -101,12 +101,12 @@ public class CommandCheckerTest {
 
         final ZonedDateTime startTime = new UtcClock().now();
 
-        final SystemCommanderMBean systemCommanderMBean = mock(SystemCommanderMBean.class);
+        final JmxCommandMBean jmxCommandMBean = mock(JmxCommandMBean.class);
         final SystemCommandStatus systemCommandStatus = mock(SystemCommandStatus.class);
 
-        when(systemCommanderMBean.getCommandStatus(commandId)).thenReturn(systemCommandStatus);
+        when(jmxCommandMBean.getCommandStatus(commandId)).thenReturn(systemCommandStatus);
         when(systemCommandStatus.getCommandState()).thenReturn(COMMAND_IN_PROGRESS);
 
-        assertThat(commandChecker.commandComplete(systemCommanderMBean, commandId, startTime), is(false));
+        assertThat(commandChecker.commandComplete(jmxCommandMBean, commandId, startTime), is(false));
     }
 }

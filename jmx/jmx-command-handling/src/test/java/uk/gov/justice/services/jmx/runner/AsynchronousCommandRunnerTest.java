@@ -1,9 +1,9 @@
 package uk.gov.justice.services.jmx.runner;
 
-import static java.util.Optional.empty;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.jmx.api.domain.CommandState.COMMAND_RECEIVED;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.getValueOfField;
@@ -11,11 +11,11 @@ import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.
 import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.jmx.api.command.SystemCommand;
 import uk.gov.justice.services.jmx.api.domain.SystemCommandStatus;
+import uk.gov.justice.services.jmx.api.parameters.JmxCommandRuntimeParameters;
 import uk.gov.justice.services.jmx.command.TestCommand;
 import uk.gov.justice.services.jmx.state.observers.SystemCommandStateBean;
 
 import java.time.ZonedDateTime;
-import java.util.Optional;
 import java.util.UUID;
 
 import javax.enterprise.concurrent.ManagedExecutorService;
@@ -61,11 +61,11 @@ public class AsynchronousCommandRunnerTest {
 
         final ZonedDateTime now = new UtcClock().now();
         final SystemCommand systemCommand = new TestCommand();
-        final Optional<UUID> commandRuntimeId = empty();
+        final JmxCommandRuntimeParameters jmxCommandRuntimeParameters = mock(JmxCommandRuntimeParameters.class);
 
         when(clock.now()).thenReturn(now);
 
-        final UUID commandId = asynchronousCommandRunner.run(systemCommand, commandRuntimeId);
+        final UUID commandId = asynchronousCommandRunner.run(systemCommand, jmxCommandRuntimeParameters);
 
         final InOrder inOrder = inOrder(systemCommandStateBean, managedExecutorService);
 

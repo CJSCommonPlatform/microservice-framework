@@ -11,7 +11,7 @@ import uk.gov.justice.framework.command.client.io.ToConsolePrinter;
 import uk.gov.justice.framework.command.client.util.UtcClock;
 import uk.gov.justice.services.jmx.api.domain.CommandState;
 import uk.gov.justice.services.jmx.api.domain.SystemCommandStatus;
-import uk.gov.justice.services.jmx.api.mbean.SystemCommanderMBean;
+import uk.gov.justice.services.jmx.api.mbean.JmxCommandMBean;
 
 import java.time.ZonedDateTime;
 import java.util.UUID;
@@ -26,9 +26,9 @@ public class CommandChecker {
         this.clock = clock;
     }
 
-    public boolean commandComplete(final SystemCommanderMBean systemCommanderMBean, final UUID commandId, final ZonedDateTime startTime) {
+    public boolean commandComplete(final JmxCommandMBean jmxCommandMBean, final UUID commandId, final ZonedDateTime startTime) {
 
-        final SystemCommandStatus commandStatus = systemCommanderMBean.getCommandStatus(commandId);
+        final SystemCommandStatus commandStatus = jmxCommandMBean.getCommandStatus(commandId);
 
 
         final CommandState commandState = commandStatus.getCommandState();

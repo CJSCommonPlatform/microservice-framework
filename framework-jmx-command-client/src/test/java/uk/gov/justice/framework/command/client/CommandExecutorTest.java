@@ -8,10 +8,10 @@ import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.jmx.api.mbean.CommandRunMode.GUARDED;
 
 import uk.gov.justice.framework.command.client.io.CommandPrinter;
-import uk.gov.justice.framework.command.client.io.ToConsolePrinter;
 import uk.gov.justice.framework.command.client.jmx.SystemCommandInvoker;
 import uk.gov.justice.services.jmx.api.command.SystemCommandDetails;
 import uk.gov.justice.services.jmx.api.mbean.CommandRunMode;
+import uk.gov.justice.services.jmx.api.parameters.JmxCommandRuntimeParameters;
 import uk.gov.justice.services.jmx.system.command.client.connection.JmxParameters;
 
 import java.util.List;
@@ -23,7 +23,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-
 @ExtendWith(MockitoExtension.class)
 public class CommandExecutorTest {
 
@@ -31,7 +30,7 @@ public class CommandExecutorTest {
     private SystemCommandInvoker systemCommandInvoker;
 
     @Mock
-    private ToConsolePrinter toConsolePrinter;
+    private JmxRuntimeParametersFactory jmxRuntimeParametersFactory;
 
     @Mock
     private CommandPrinter commandPrinter;
@@ -47,23 +46,23 @@ public class CommandExecutorTest {
 
         final String commandName = "CATCHUP";
         final CommandRunMode commandRunMode = GUARDED;
-        final String commandRuntimeId = "SOME_ID";
 
         final SystemCommandDetails systemCommandDetails_1 = mock(SystemCommandDetails.class);
         final SystemCommandDetails systemCommandDetails_2 = mock(SystemCommandDetails.class);
 
         final CommandLine commandLine = mock(CommandLine.class);
         final JmxParameters jmxParameters = mock(JmxParameters.class);
+        final JmxCommandRuntimeParameters jmxCommandRuntimeParameters = mock(JmxCommandRuntimeParameters.class);
         final List<SystemCommandDetails> systemCommands = asList(systemCommandDetails_1, systemCommandDetails_2);
 
         when(commandLine.hasOption("list")).thenReturn(false);
         when(commandLine.getOptionValue("command")).thenReturn(commandName);
+        when(jmxRuntimeParametersFactory.createFrom(commandLine)).thenReturn(jmxCommandRuntimeParameters);
         when(commandRunModeSelector.selectCommandRunMode(commandLine)).thenReturn(commandRunMode);
-        when(commandLine.getOptionValue("crid")).thenReturn(commandRuntimeId);
 
         commandExecutor.executeCommand(commandLine, jmxParameters, systemCommands);
 
-        verify(systemCommandInvoker).runSystemCommand(commandName, jmxParameters, commandRuntimeId, commandRunMode);
+        verify(systemCommandInvoker).runSystemCommand(commandName, jmxParameters, jmxCommandRuntimeParameters, commandRunMode);
     }
 
     @Test

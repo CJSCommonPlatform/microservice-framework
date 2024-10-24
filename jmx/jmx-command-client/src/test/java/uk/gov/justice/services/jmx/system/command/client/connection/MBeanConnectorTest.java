@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import uk.gov.justice.services.jmx.api.mbean.SystemCommanderMBean;
+import uk.gov.justice.services.jmx.api.mbean.JmxCommandMBean;
 import uk.gov.justice.services.jmx.api.name.CommandMBeanNameProvider;
 import uk.gov.justice.services.jmx.api.name.ObjectNameFactory;
 import uk.gov.justice.services.jmx.system.command.client.MBeanClientConnectionException;
@@ -40,19 +40,19 @@ public class MBeanConnectorTest {
     public void shouldConnectToARemoteInstanceOfTheJmxBean() throws Exception {
 
         final String contextName = "my-context";
-        final Class<SystemCommanderMBean> mBeanInterface = SystemCommanderMBean.class;
+        final Class<JmxCommandMBean> mBeanInterface = JmxCommandMBean.class;
 
         final JMXConnector jmxConnector =  mock(JMXConnector.class);
         final ObjectName objectName = mock(ObjectName.class);
         final MBeanServerConnection connection = mock(MBeanServerConnection.class);
-        final SystemCommanderMBean systemCommanderMBean = mock(SystemCommanderMBean.class);
+        final JmxCommandMBean jmxCommandMBean = mock(JmxCommandMBean.class);
 
         when(commandMBeanNameProvider.create(contextName)).thenReturn(objectName);
         when(jmxConnector.getMBeanServerConnection()).thenReturn(connection);
         when(connection.isRegistered(objectName)).thenReturn(true);
-        when(remoteMBeanFactory.createRemote(connection, objectName, mBeanInterface)).thenReturn(systemCommanderMBean);
+        when(remoteMBeanFactory.createRemote(connection, objectName, mBeanInterface)).thenReturn(jmxCommandMBean);
 
-        assertThat(mBeanConnector.connect(contextName, mBeanInterface, jmxConnector), is(systemCommanderMBean));
+        assertThat(mBeanConnector.connect(contextName, mBeanInterface, jmxConnector), is(jmxCommandMBean));
     }
 
     @Test
@@ -61,7 +61,7 @@ public class MBeanConnectorTest {
         final IOException ioException = new IOException("Ooops");
 
         final String contextName = "my-context";
-        final Class<SystemCommanderMBean> mBeanInterface = SystemCommanderMBean.class;
+        final Class<JmxCommandMBean> mBeanInterface = JmxCommandMBean.class;
 
         final JMXConnector jmxConnector =  mock(JMXConnector.class);
         final ObjectName objectName = mock(ObjectName.class);
@@ -74,7 +74,7 @@ public class MBeanConnectorTest {
             fail();
         } catch (final MBeanClientConnectionException expected) {
             assertThat(expected.getCause(), is(ioException));
-            assertThat(expected.getMessage(), is("Failed to get remote connection to MBean 'SystemCommanderMBean'"));
+            assertThat(expected.getMessage(), is("Failed to get remote connection to MBean 'JmxCommandMBean'"));
         }
     }
 
@@ -84,7 +84,7 @@ public class MBeanConnectorTest {
         final String contextName = "people";
         final ObjectName realObjectName = createARealObjectName(contextName);
 
-        final Class<SystemCommanderMBean> mBeanInterface = SystemCommanderMBean.class;
+        final Class<JmxCommandMBean> mBeanInterface = JmxCommandMBean.class;
         final JMXConnector jmxConnector =  mock(JMXConnector.class);
         final MBeanServerConnection connection = mock(MBeanServerConnection.class);
 

@@ -3,6 +3,7 @@ package uk.gov.justice.framework.command.client.startup;
 import uk.gov.justice.framework.command.client.CommandExecutor;
 import uk.gov.justice.framework.command.client.CommandRunModeSelector;
 import uk.gov.justice.framework.command.client.JmxParametersFactory;
+import uk.gov.justice.framework.command.client.JmxRuntimeParametersFactory;
 import uk.gov.justice.framework.command.client.MainApplication;
 import uk.gov.justice.framework.command.client.ReturnCodeFactory;
 import uk.gov.justice.framework.command.client.cdi.producers.OptionsFactory;
@@ -10,6 +11,7 @@ import uk.gov.justice.framework.command.client.io.CommandPrinter;
 import uk.gov.justice.framework.command.client.io.ToConsolePrinter;
 import uk.gov.justice.framework.command.client.jmx.CommandChecker;
 import uk.gov.justice.framework.command.client.jmx.CommandPoller;
+import uk.gov.justice.framework.command.client.jmx.CommandRuntimeIdConverter;
 import uk.gov.justice.framework.command.client.jmx.ListCommandsInvoker;
 import uk.gov.justice.framework.command.client.jmx.SystemCommandInvoker;
 import uk.gov.justice.framework.command.client.util.Sleeper;
@@ -42,7 +44,6 @@ public class ObjectFactory {
     }
 
     public CommandLineArgumentParser commandLineArgumentParser() {
-
         return new CommandLineArgumentParser(toConsolePrinter(), optionsFactory(), basicParser());
     }
 
@@ -58,8 +59,20 @@ public class ObjectFactory {
         return new OptionsFactory();
     }
 
+    public CommandRuntimeIdConverter uuidConverter() {
+        return new CommandRuntimeIdConverter();
+    }
+
+    public JmxRuntimeParametersFactory jmxRuntimeParametersFactory() {
+        return new JmxRuntimeParametersFactory(uuidConverter());
+    }
+
     public CommandExecutor commandExecutor() {
-        return new CommandExecutor(systemCommandInvoker(), commandPrinter(), commandRunModeSelector());
+        return new CommandExecutor(
+                systemCommandInvoker(),
+                commandPrinter(),
+                commandRunModeSelector(),
+                jmxRuntimeParametersFactory());
     }
 
     public HelpFormatter helpFormatter() {
@@ -116,5 +129,4 @@ public class ObjectFactory {
     public CommandRunModeSelector commandRunModeSelector() {
         return new CommandRunModeSelector();
     }
-
 }

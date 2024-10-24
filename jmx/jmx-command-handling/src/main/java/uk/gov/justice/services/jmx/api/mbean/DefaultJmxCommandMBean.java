@@ -1,15 +1,15 @@
 package uk.gov.justice.services.jmx.api.mbean;
 
 import static java.lang.String.format;
-import static java.util.Optional.empty;
-import static java.util.Optional.of;
 import static java.util.stream.Collectors.toList;
+import static uk.gov.justice.services.jmx.api.mbean.CommandRunMode.FORCED;
 
 import uk.gov.justice.services.jmx.api.CommandNotFoundException;
 import uk.gov.justice.services.jmx.api.UnrunnableSystemCommandException;
 import uk.gov.justice.services.jmx.api.command.SystemCommand;
 import uk.gov.justice.services.jmx.api.command.SystemCommandDetails;
 import uk.gov.justice.services.jmx.api.domain.SystemCommandStatus;
+import uk.gov.justice.services.jmx.api.parameters.JmxCommandRuntimeParameters;
 import uk.gov.justice.services.jmx.command.CommandConverter;
 import uk.gov.justice.services.jmx.command.SystemCommandLocator;
 import uk.gov.justice.services.jmx.command.SystemCommandScanner;
@@ -17,14 +17,13 @@ import uk.gov.justice.services.jmx.runner.AsynchronousCommandRunner;
 import uk.gov.justice.services.jmx.state.observers.SystemCommandStateBean;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
 
-public class SystemCommander implements SystemCommanderMBean {
+public class DefaultJmxCommandMBean implements JmxCommandMBean {
 
     @Inject
     private SystemCommandLocator systemCommandLocator;
@@ -42,33 +41,25 @@ public class SystemCommander implements SystemCommanderMBean {
     private CommandConverter commandConverter;
 
     @Inject
-    private SystemCommandVerifier systemCommandVerifier;
+    private JmxCommandVerifier jmxCommandVerifier;
 
     @Inject
     private Logger logger;
 
     @Override
-    public UUID call(final String systemCommandName) {
+    public UUID call(final String systemCommandName, final JmxCommandRuntimeParameters jmxCommandRuntimeParameters) {
         logger.info(format("Received System Command '%s'", systemCommandName));
-        logger.info(format("Running '%s' in '%s' mode", systemCommandName, CommandRunMode.FORCED));
+        logger.info(format("Running '%s' in '%s' mode", systemCommandName, FORCED));
 
-        return doCall(systemCommandName, empty(), CommandRunMode.FORCED);
+        return doCall(systemCommandName, jmxCommandRuntimeParameters, FORCED);
     }
 
     @Override
-    public UUID call(final String systemCommandName, final CommandRunMode commandRunMode) {
+    public UUID call(final String systemCommandName, final JmxCommandRuntimeParameters jmxCommandRuntimeParameters, final CommandRunMode commandRunMode) {
         logger.info(format("Received System Command '%s'", systemCommandName));
         logger.info(format("Running '%s' in '%s' mode", systemCommandName, commandRunMode));
 
-        return doCall(systemCommandName, empty(), commandRunMode);
-    }
-
-    @Override
-    public UUID callWithRuntimeId(final String systemCommandName, final UUID commandRuntimeId, final CommandRunMode commandRunMode) {
-        logger.info(format("Received System Command '%s' with UUID '%s'", systemCommandName, commandRuntimeId));
-        logger.info(format("Running '%s' with UUID '%s' in '%s' mode", systemCommandName, commandRuntimeId, commandRunMode));
-
-        return doCall(systemCommandName, of(commandRuntimeId), commandRunMode);
+        return doCall(systemCommandName, jmxCommandRuntimeParameters, commandRunMode);
     }
 
     @Override
@@ -86,12 +77,12 @@ public class SystemCommander implements SystemCommanderMBean {
                 .orElseThrow(() -> new CommandNotFoundException(format("No SystemCommand found with id %s", commandId)));
     }
 
-    private UUID doCall(final String systemCommandName, final Optional<UUID> commandRuntimeId, final CommandRunMode commandRunMode) {
+    private UUID doCall(final String systemCommandName, final JmxCommandRuntimeParameters jmxCommandRuntimeParameters, final CommandRunMode commandRunMode) {
         final SystemCommand systemCommand = systemCommandLocator
                 .forName(systemCommandName)
                 .orElseThrow(() -> new UnrunnableSystemCommandException(format("The system command '%s' is not supported on this context.", systemCommandName)));
 
-        systemCommandVerifier.verify(systemCommand, commandRuntimeId);
+        jmxCommandVerifier.verify(systemCommand, jmxCommandRuntimeParameters);
 
         if (commandRunMode.isGuarded()) {
             if (systemCommandStateBean.commandInProgress(systemCommand)) {
@@ -99,6 +90,6 @@ public class SystemCommander implements SystemCommanderMBean {
             }
         }
 
-        return asynchronousCommandRunner.run(systemCommand, commandRuntimeId);
+        return asynchronousCommandRunner.run(systemCommand, jmxCommandRuntimeParameters);
     }
 }

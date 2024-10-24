@@ -1,6 +1,6 @@
 package uk.gov.justice.services.jmx.system.command.client;
 
-import uk.gov.justice.services.jmx.api.mbean.SystemCommanderMBean;
+import uk.gov.justice.services.jmx.api.mbean.JmxCommandMBean;
 import uk.gov.justice.services.jmx.system.command.client.connection.MBeanConnector;
 
 import java.io.Closeable;
@@ -19,11 +19,11 @@ public class SystemCommanderClient implements Closeable {
         this.mBeanConnector = mBeanConnector;
     }
 
-    public SystemCommanderMBean getRemote(final String contextName) {
+    public JmxCommandMBean getRemote(final String contextName) {
 
         return mBeanConnector.connect(
                 contextName,
-                SystemCommanderMBean.class,
+                JmxCommandMBean.class,
                 jmxConnector
         );
     }
