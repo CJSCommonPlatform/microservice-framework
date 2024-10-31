@@ -4,9 +4,14 @@ import static com.jayway.jsonassert.JsonAssert.with;
 import static java.util.UUID.randomUUID;
 import static javax.json.Json.createArrayBuilder;
 import static javax.json.Json.createObjectBuilder;
+import static javax.json.JsonValue.EMPTY_JSON_ARRAY;
+import static javax.json.JsonValue.EMPTY_JSON_OBJECT;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.hasItems;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.messaging.JsonEnvelope.metadataBuilder;
 
@@ -68,13 +73,61 @@ public class DefaultJsonEnvelopeTest {
     }
 
     @Test
+    public void shouldThrowExceptionWhenGettingPayloadAsJsonObjectIfPayloadIsJsonNull() throws Exception {
+        final IncompatibleJsonPayloadTypeException incompatibleJsonPayloadTypeException = assertThrows(
+                IncompatibleJsonPayloadTypeException.class,
+                () -> envelopeFrom(metadata, JsonValue.NULL).payloadAsJsonObject());
+
+        assertThat(incompatibleJsonPayloadTypeException.getMessage(), is("The payload of this JsonEnvelope is set to JsonValue.NULL which is not a JsonObject. Please call the method 'payload()' instead if your payload is expected to be null. To check for null payloads please call the method 'payloadIsNull()'."));
+    }
+
+    @Test
     public void shouldReturnPayloadAsJsonArray() {
         assertThat(envelopeFrom(metadata, payloadAsJsonArray).payloadAsJsonArray(), equalTo(payloadAsJsonArray));
     }
 
     @Test
+    public void shouldCheckIfPayloadIsNull() throws Exception {
+        assertThat(envelopeFrom(metadata, null).payloadIsNull(), is(true));
+    }
+
+    @Test
+    public void shouldCheckIfPayloadIsJsonNull() throws Exception {
+        assertThat(envelopeFrom(metadata, JsonValue.NULL).payloadIsNull(), is(true));
+    }
+
+    @Test
+    public void shouldThrowExceptionWhenGettingPayloadAsJsonArrayIfPayloadIsJsonNull() throws Exception {
+        final IncompatibleJsonPayloadTypeException incompatibleJsonPayloadTypeException = assertThrows(
+                IncompatibleJsonPayloadTypeException.class,
+                () -> envelopeFrom(metadata, JsonValue.NULL).payloadAsJsonArray());
+
+        assertThat(incompatibleJsonPayloadTypeException.getMessage(), is("The payload of this JsonEnvelope is set to JsonValue.NULL which is not a JsonArray. Please call the method 'payload()' instead if your payload is expected to be null. To check for null payloads please call the method 'payloadIsNull()'."));
+    }
+
+    @Test
     public void shouldReturnPayloadAsJsonNumber() {
         assertThat(envelopeFrom(metadata, payloadAsJsonNumber).payloadAsJsonNumber(), equalTo(payloadAsJsonNumber));
+    }
+
+    @Test
+    public void shouldThrowExceptionWhenGettingPayloadAsJsonStringIfPayloadIsJsonNull() throws Exception {
+
+        final IncompatibleJsonPayloadTypeException incompatibleJsonPayloadTypeException = assertThrows(
+                IncompatibleJsonPayloadTypeException.class,
+                () -> envelopeFrom(metadata, JsonValue.NULL).payloadAsJsonString());
+
+        assertThat(incompatibleJsonPayloadTypeException.getMessage(), is("The payload of this JsonEnvelope is set to JsonValue.NULL which is not a JsonString. Please call the method 'payload()' instead if your payload is expected to be null. To check for null payloads please call the method 'payloadIsNull()'."));
+    }
+
+    @Test
+    public void shouldThrowExceptionWhenGettingPayloadAsJsonNumberIfPayloadIsJsonNull() throws Exception {
+
+        final IncompatibleJsonPayloadTypeException incompatibleJsonPayloadTypeException = assertThrows(
+                IncompatibleJsonPayloadTypeException.class,
+                () -> envelopeFrom(metadata, JsonValue.NULL).payloadAsJsonNumber());
+
+        assertThat(incompatibleJsonPayloadTypeException.getMessage(), is("The payload of this JsonEnvelope is set to JsonValue.NULL which is not a JsonNumber. Please call the method 'payload()' instead if your payload is expected to be null. To check for null payloads please call the method 'payloadIsNull()'."));
     }
 
     @Test
