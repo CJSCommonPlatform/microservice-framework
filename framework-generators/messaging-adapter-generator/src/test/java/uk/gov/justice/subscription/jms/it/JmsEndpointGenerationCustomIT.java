@@ -109,7 +109,6 @@ import org.junit.jupiter.api.Test;
 public class JmsEndpointGenerationCustomIT extends AbstractJmsAdapterGenerationIT {
     @Module
     @Classes(cdi = true, value = {
-
             CustomEventListenerPeopleEventEventFilter.class,
             CustomEventListenerPeopleEventEventFilterInterceptor.class,
             CustomEventListenerPeopleEventEventInterceptorChainProvider.class,
@@ -206,7 +205,8 @@ public class JmsEndpointGenerationCustomIT extends AbstractJmsAdapterGenerationI
 
             OversizeMessageGuard.class,
             JmsMessagingConfiguration.class,
-            ValueProducer.class
+            ValueProducer.class,
+            DummyJsonEnvelopeProcessingFailureHandler.class
     })
     public WebApp war() {
         return new WebApp()

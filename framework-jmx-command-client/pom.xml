@@ -101,6 +101,7 @@
                     <appendAssemblyId>false</appendAssemblyId>
                     <archive>
                         <manifest>
+                            <addClasspath>true</addClasspath>
                             <mainClass>
                                 uk.gov.justice.framework.command.client.startup.JmxCommandClient
                             </mainClass>

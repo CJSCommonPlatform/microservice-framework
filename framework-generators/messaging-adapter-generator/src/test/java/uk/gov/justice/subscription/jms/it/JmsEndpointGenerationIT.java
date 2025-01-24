@@ -201,7 +201,8 @@ public class JmsEndpointGenerationIT extends AbstractJmsAdapterGenerationIT {
 
             OversizeMessageGuard.class,
             JmsMessagingConfiguration.class,
-            ValueProducer.class
+            ValueProducer.class,
+            DummyJsonEnvelopeProcessingFailureHandler.class
     })
     public WebApp war() {
         return new WebApp()
